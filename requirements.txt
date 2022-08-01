@@ -3,3 +3,4 @@ anilibria.py
 python-dotenv
 pymongo
 motor
+dnspython
