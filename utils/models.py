@@ -1,4 +1,4 @@
-from anilibria.api.models.attrs_utils import define, DictSerializer
+from anilibria.api.models.attrs_utils import DictSerializer, define
 
 __all__ = ["GuildData"]
 

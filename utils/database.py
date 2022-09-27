@@ -1,5 +1,5 @@
-from pymongo import MongoClient
 from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo import MongoClient
 
 from .models import GuildData
 
@@ -28,9 +28,7 @@ class DataBaseClient:
                 return guild
 
     async def add_guild(self, guild_id: int):
-        await self.collection.insert_one(
-            {"_id": guild_id, "subscriptions": [], "channel_id": None}
-        )
+        await self.collection.insert_one({"_id": guild_id, "subscriptions": [], "channel_id": None})
         guild = GuildData(id=guild_id, subscriptions=[], channel_id=None)
         self.guilds.append(guild)
         return guild

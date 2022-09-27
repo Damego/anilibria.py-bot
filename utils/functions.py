@@ -1,13 +1,5 @@
-from interactions import (
-    Button,
-    ButtonStyle,
-    CommandContext,
-    Embed,
-    Color,
-    SelectMenu,
-    SelectOption,
-)
-from anilibria import TitleSerieEvent, Title
+from anilibria import Title, TitleSerieEvent
+from interactions import Button, ButtonStyle, Color, CommandContext, Embed, SelectMenu, SelectOption
 
 __all__ = [
     "render_components",
@@ -43,8 +35,7 @@ def render_select_title(titles: list[Title]) -> list[SelectMenu]:
         SelectMenu(
             placeholder="Выберите тайтл",
             options=[
-                SelectOption(label=title.names.ru[:100], value=str(title.id))
-                for title in titles
+                SelectOption(label=title.names.ru[:100], value=str(title.id)) for title in titles
             ],
             custom_id="select_title",
         )
@@ -53,9 +44,7 @@ def render_select_title(titles: list[Title]) -> list[SelectMenu]:
 
 
 def render_embed(ctx: CommandContext, title: Title) -> Embed:
-    embed = Embed(
-        title=title.names.ru, description=title.description, color=Color.blurple()
-    )
+    embed = Embed(title=title.names.ru, description=title.description, color=Color.blurple())
     embed.add_field(
         name="Информация",
         value=f"**Сезон:** `{title.season.year}, {title.season.string}`\n"

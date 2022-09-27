@@ -2,17 +2,16 @@ import asyncio
 from os import getenv
 
 import anilibria
-from dotenv import load_dotenv
 import interactions
+from dotenv import load_dotenv
 
 from utils.client import AniClient
-from utils.functions import (
+from utils import (
     render_components,
     render_embed,
     render_notification_message,
     render_select_title,
 )
-
 
 load_dotenv()
 
@@ -22,12 +21,19 @@ client = anilibria.AniLibriaClient()
 
 @bot.event
 async def on_start():
-    print("Bot ready")
+    await bot.change_presence(
+        interactions.ClientPresence(
+            status=interactions.StatusType.DND,
+            activities=[
+                interactions.PresenceActivity(
+                    name="аниме", type=interactions.PresenceActivityType.WATCHING
+                )
+            ],
+        )
+    )
     await bot.database.get_guilds()
 
-    await asyncio.sleep(
-        5
-    )  # Waiting while all guilds where bot in appears in cache. If guild too much it can take more than 5 seconds
+    await asyncio.sleep(5)
     for guild in bot.guilds:
         if int(guild.id) not in [guild_data.id for guild_data in bot.database.guilds]:
             await bot.database.add_guild(int(guild.id))
@@ -62,21 +68,20 @@ async def on_ready():
 
 
 @bot.command(name="anilibria", description="Command for other commands")
-@interactions.autodefer()
-async def anilibria(ctx: interactions.CommandContext):
+async def _anilibria(ctx: interactions.CommandContext):
+    await ctx.defer()
     ...
 
 
-@anilibria.subcommand(name="random", description="Показывает рандомный тайтл")
+@_anilibria.subcommand(name="random", description="Показывает рандомный тайтл")
 async def random_title(ctx: interactions.CommandContext):
-    await ctx.defer()
     title = await client.get_random_title()
     embed = render_embed(ctx, title)
     components = render_components(title, False)
     await ctx.send(embeds=embed, components=components)
 
 
-@anilibria.subcommand(name="search", description="Ищет аниме")
+@_anilibria.subcommand(name="search", description="Ищет аниме")
 @interactions.option(
     option_type=interactions.OptionType.STRING,
     name="query",
@@ -84,8 +89,6 @@ async def random_title(ctx: interactions.CommandContext):
     required=True,
 )
 async def search_title(ctx: interactions.CommandContext, query: str):
-    await ctx.defer()
-
     titles = await client.search_titles(search=[query])
     if not titles:
         return await ctx.send(f"По запросу `{query}` ничего не найдено!")
@@ -94,9 +97,7 @@ async def search_title(ctx: interactions.CommandContext, query: str):
         title = titles[0]
         embed = render_embed(ctx, title)
         guild_data = bot.database.get_guild(int(ctx.guild_id))
-        components = render_components(
-            title, subscribe=title.id not in guild_data.subscriptions
-        )
+        components = render_components(title, subscribe=title.id not in guild_data.subscriptions)
         await ctx.send(embeds=embed, components=components)
         return
 
@@ -113,13 +114,11 @@ async def select_title(ctx: interactions.ComponentContext, title_id: str):
     title = await client.get_title(id=title_id)
     embed = render_embed(ctx, title)
     guild_data = bot.database.get_guild(int(ctx.guild_id))
-    components = render_components(
-        title, subscribe=title.id not in guild_data.subscriptions
-    )
+    components = render_components(title, subscribe=title.id not in guild_data.subscriptions)
     await ctx.edit(content=None, embeds=embed, components=components)
 
 
-@anilibria.subcommand(
+@_anilibria.subcommand(
     name="set-notification-channel", description="Устанавливает канал для уведомлений"
 )
 @interactions.option(
@@ -129,9 +128,7 @@ async def select_title(ctx: interactions.ComponentContext, title_id: str):
     required=True,
     channel_types=[interactions.ChannelType.GUILD_TEXT],
 )
-async def set_notification_channel(
-    ctx: interactions.CommandContext, channel: interactions.Channel
-):
+async def set_notification_channel(ctx: interactions.CommandContext, channel: interactions.Channel):
     if not has_admin_perm(ctx):
         return await ctx.send("У вас недостаточно прав", ephemeral=True)
     try:
