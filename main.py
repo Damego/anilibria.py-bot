@@ -1,5 +1,6 @@
 import asyncio
 from os import getenv
+import logging
 
 import anilibria
 import interactions
@@ -13,6 +14,12 @@ from utils import (
     render_select_title,
 )
 
+logging.basicConfig(level=logging.DEBUG)
+[
+    logging.getLogger(name).setLevel(logging.WARNING)
+    for name in logging.root.manager.loggerDict
+    if "anilibria" not in name
+]
 load_dotenv()
 
 bot = AniClient(getenv("TOKEN"), getenv("MONGO_URL"))
