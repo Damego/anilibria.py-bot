@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.DEBUG)
 [
     logging.getLogger(name).setLevel(logging.WARNING)
     for name in logging.root.manager.loggerDict
-    if "anilibria" not in name
+    if "anilibria" in name
 ]
 load_dotenv()
 
